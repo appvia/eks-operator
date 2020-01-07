@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eks-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: eks-operator
+  template:
+    metadata:
+      labels:
+        name: eks-operator
+    spec:
+      serviceAccountName: eks-operator
+      containers:
+        - name: eks-operator
+          image: quay.io/appvia/eks-operator
+          command:
+          - eks-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "eks-operator"

@@ -1,0 +1,7 @@
+apiVersion: aws.compute.hub.appvia.io/v1alpha1
+kind: EKSCluster
+metadata:
+  name: example-ekscluster
+spec:
+  # Add fields here
+  size: 3

@@ -1,0 +1,7 @@
+apiVersion: aws.compute.hub.appvia.io/v1alpha1
+kind: AWSToken
+metadata:
+  name: example-awstoken
+spec:
+  # Add fields here
+  size: 3
