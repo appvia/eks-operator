@@ -4,23 +4,30 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // AWSCredentialSpec defines the desired state of AWSCredential
 // +k8s:openapi-gen=true
 type AWSCredentialSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// AWS Secret Access Key
+	// +kubebuilder:validation:Minimum=3
+	// +kubebuilder:validation:Required
+	SecretAccessKey string `json:"secret"`
+	// AWS Access Key ID
+	// +kubebuilder:validation:Minimum=3
+	// +kubebuilder:validation:Required
+	AccessKeyId string `json:"id"`
+	// Account is the AWS account these credentials reside within
+	// +kubebuilder:validation:Minimum=3
+	// +kubebuilder:validation:Required
+	AccountId string `json:"accountId"`
 }
 
 // AWSCredentialStatus defines the observed state of AWSCredential
 // +k8s:openapi-gen=true
 type AWSCredentialStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// Verified checks that the credentials are ok and valid
+	Verified bool `json:"verified"`
+	// Status provides a overall status
+	Status string `json:"status"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

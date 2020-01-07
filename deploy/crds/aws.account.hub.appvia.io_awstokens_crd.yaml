@@ -43,11 +43,15 @@ spec:
             expiration:
               description: Expiration date time
               type: string
+            accountId:
+              description: AWS Account ID
+              type: string
           required:
           - id
           - secret
           - token
           - expiration
+          - accountId
         status:
           description: AWSTokenStatus defines the observed state of AWSToken
           type: object
