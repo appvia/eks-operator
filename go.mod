@@ -3,15 +3,16 @@ module github.com/appvia/eks-operator
 go 1.13
 
 require (
+	github.com/appvia/hub-apis v0.0.2
 	github.com/aws/aws-sdk-go v1.16.26
-	github.com/go-openapi/spec v0.19.0
+	github.com/go-openapi/spec v0.19.3
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/spf13/pflag v1.0.3
-	golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc
+	golang.org/x/net v0.0.0-20190827160401-ba9fcec4b297
 	k8s.io/api v0.0.0
 	k8s.io/apimachinery v0.0.0
-	k8s.io/client-go v11.0.0+incompatible
-	k8s.io/kube-openapi v0.0.0-20190918143330-0270cf2f1c1d
+	k8s.io/client-go v11.0.1-0.20190409021438-1a26190bd76a+incompatible
+	k8s.io/kube-openapi v0.0.0-20191107075043-30be4d16710a
 	sigs.k8s.io/controller-runtime v0.3.0
 )
 

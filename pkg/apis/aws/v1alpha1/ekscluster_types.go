@@ -1,26 +1,37 @@
 package v1alpha1
 
 import (
+	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
 // EKSClusterSpec defines the desired state of EKSCluster
 // +k8s:openapi-gen=true
 type EKSClusterSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// Name the name of the EKS cluster
+	// +kubebuilder:validation:MinLength=3
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// RoleArn is the role arn which provides permissions to EKS
+	// +kubebuilder:validation:MinLength=10
+	// +kubebuilder:validation:Required
+	RoleArn string `json:"rolearn"`
+	// Version is the Kubernetes version to use
+	// +kubebuilder:validation:MinLength=3
+	// +kubebuilder:validation:Required
+	Version string `json:"version"`
+	// Use is a reference to an AWSCredentials object to use for authentication
+	// +kubebuilder:validation:Required
+	// +k8s:openapi-gen=false
+	Use core.Ownership `json:"use"`
 }
 
 // EKSClusterStatus defines the observed state of EKSCluster
 // +k8s:openapi-gen=true
 type EKSClusterStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// Status provides a overall status
+	Status core.Status `json:"status"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
