@@ -3,33 +3,36 @@ package ekscluster
 import (
 	"fmt"
 
-	"github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
+	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/eks"
+	eks "github.com/aws/aws-sdk-go/service/eks"
 )
 
 // VerifyCredentials is responsible for verifying AWS creds
-func VerifyCredentials(credentials *AWSCredentials) error {
+func VerifyCredentials(credentials *awsv1alpha1.AWSCredential) error {
 	return nil
 }
 
-func GetAWSSession(credentials *v1alpha1.AWSCredentials) (*Session, error) {
-	sess, err := session.NewSession(&aws.Config{
+// Get an AWS session
+func GetAWSSession(credentials *awsv1alpha1.AWSCredential) (*session.Session, error) {
+	sesh, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-west-2"),
 	})
-	return sess
+	return sesh, err
 }
 
-func GetEKSService(credentials *v1alpha1.AWSCredentials) (err error, svc *EKS) {
+// Get an EKS service
+func GetEKSService(credentials *awsv1alpha1.AWSCredential) (svc *eks.EKS, err error) {
 	svc = eks.New(session.New())
-	return svc
+	return svc, err
 }
 
-func createCluster(svc EKS, input *CreateClusterInput) (*CreateClusterOutput, error) {
-	result, err := svc.CreateCluster(input)
+// Create an EKS cluster
+func CreateCluster(svc *eks.EKS, input *eks.CreateClusterInput) (output *eks.CreateClusterOutput, err error) {
+	output, err = svc.CreateCluster(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -57,11 +60,12 @@ func createCluster(svc EKS, input *CreateClusterInput) (*CreateClusterOutput, er
 		}
 		return
 	}
-	fmt.Println(result)
+	return
 }
 
-func deleteCluster(svc *EKS, input *DeleteClusterInput) (output *DeleteClusterOutput, err error) {
-	result, err := svc.DeleteCluster(input)
+// Delete an EKS cluster
+func DeleteCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.DeleteClusterOutput, err error) {
+	output, err = svc.DeleteCluster(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -85,6 +89,5 @@ func deleteCluster(svc *EKS, input *DeleteClusterInput) (output *DeleteClusterOu
 		}
 		return
 	}
-
-	fmt.Println(result)
+	return
 }
