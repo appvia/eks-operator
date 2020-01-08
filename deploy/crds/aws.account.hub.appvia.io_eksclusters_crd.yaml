@@ -45,6 +45,8 @@ spec:
                 type: string
             rolearn:
               type: string
+            region:
+              type: string
             version:
               type: string
             use:
@@ -66,12 +68,17 @@ spec:
                   description: Version is the group version
                   type: string
               required:
-              - group
-              - kind
-              - name
-              - namespace
-              - version
+                - group
+                - kind
+                - name
+                - namespace
+                - version
               type: object
+          required:
+            - name
+            - subnetids
+            - rolearn
+            - region
         status:
           description: EKSClusterStatus defines the observed state of EKSCluster
           type: object

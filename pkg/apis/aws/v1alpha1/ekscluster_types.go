@@ -20,8 +20,11 @@ type EKSClusterSpec struct {
 	// Version is the Kubernetes version to use
 	// +kubebuilder:validation:MinLength=3
 	// +kubebuilder:validation:Required
-	Version string `json:"version"`
+	Version string `json:"version,omitempty"`
 	// SubnetIds is a list of subnet IDs
+	// +kubebuilder:validation:Required
+	Region string `json:"region"`
+	// AWS region to launch this cluster within
 	// +kubebuilder:validation:Required
 	SubnetIds []string `json:"subnetids"`
 	// SecurityGroupIds is a list of security group IDs
