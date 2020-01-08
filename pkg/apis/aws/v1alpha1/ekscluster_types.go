@@ -21,6 +21,12 @@ type EKSClusterSpec struct {
 	// +kubebuilder:validation:MinLength=3
 	// +kubebuilder:validation:Required
 	Version string `json:"version"`
+	// SubnetIds is a list of subnet IDs
+	// +kubebuilder:validation:Required
+	SubnetIds []string `json:"subnetids"`
+	// SecurityGroupIds is a list of security group IDs
+	// +kubebuilder:validation:Required
+	SecurityGroupIds []string `json:"securitygroupids,omitempty"`
 	// Use is a reference to an AWSCredentials object to use for authentication
 	// +kubebuilder:validation:Required
 	// +k8s:openapi-gen=false

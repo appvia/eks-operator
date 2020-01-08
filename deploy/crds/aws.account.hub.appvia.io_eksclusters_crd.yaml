@@ -33,21 +33,16 @@ spec:
           properties:
             name:
               type: string
-            resourcesvpcconfig:
-              type: object
-              properties:
-                securitygroupids:
-                  description: A list of security group IDs
-                  type: array
-                  items: 
-                    type: string
-                subnetids:
-                  description: A list of subnet IDs
-                  type: array
-                  items: 
-                    type: string
-              required:
-              - subnetids
+            securitygroupids:
+              description: A list of security group IDs
+              type: array
+              items: 
+                type: string
+            subnetids:
+              description: A list of subnet IDs
+              type: array
+              items: 
+                type: string
             rolearn:
               type: string
             version:
