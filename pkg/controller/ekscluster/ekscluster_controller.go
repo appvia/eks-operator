@@ -4,6 +4,8 @@ import (
 	"context"
 
 	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
+	"github.com/aws/aws-sdk-go/aws"
+	eks "github.com/aws/aws-sdk-go/service/eks"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -100,6 +102,23 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 	}
 
 	reqLogger.Info("Found AWSCredential CR")
+
+	sesh, err := GetAWSSession(credentials, cluster.Spec.Region)
+
+	svc, err := GetEKSService(sesh)
+
+	// Construct cluster request
+	clusterInput := &eks.CreateClusterInput{
+		Name:    aws.String(cluster.Spec.Name),
+		RoleArn: aws.String(cluster.Spec.RoleArn),
+		Version: aws.String(cluster.Spec.Version),
+		ResourcesVpcConfig: &eks.VpcConfigRequest{
+			SecurityGroupIds: aws.StringSlice(cluster.Spec.SecurityGroupIds),
+			SubnetIds:        aws.StringSlice(cluster.Spec.SubnetIds),
+		},
+	}
+
+	_, err := CreateCluster(svc, clusterInput)
 
 	return reconcile.Result{}, nil
 }

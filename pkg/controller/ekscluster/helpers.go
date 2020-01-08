@@ -18,9 +18,9 @@ func VerifyCredentials(credentials *awsv1alpha1.AWSCredential) error {
 }
 
 // Get an AWS session
-func GetAWSSession(cred *awsv1alpha1.AWSCredential) (*session.Session, error) {
+func GetAWSSession(cred *awsv1alpha1.AWSCredential, region string) (*session.Session, error) {
 	sesh, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-west-2"),
+		Region:      aws.String(region),
 		Credentials: credentials.NewStaticCredentials(cred.Spec.AccessKeyId, cred.Spec.SecretAccessKey, ""),
 	})
 	return sesh, err
