@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	eks "github.com/aws/aws-sdk-go/service/eks"
 )
@@ -17,16 +18,17 @@ func VerifyCredentials(credentials *awsv1alpha1.AWSCredential) error {
 }
 
 // Get an AWS session
-func GetAWSSession(credentials *awsv1alpha1.AWSCredential) (*session.Session, error) {
+func GetAWSSession(cred *awsv1alpha1.AWSCredential) (*session.Session, error) {
 	sesh, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2"),
+		Region:      aws.String("us-west-2"),
+		Credentials: credentials.NewStaticCredentials(cred.Spec.AccessKeyId, cred.Spec.SecretAccessKey, ""),
 	})
 	return sesh, err
 }
 
 // Get an EKS service
-func GetEKSService(credentials *awsv1alpha1.AWSCredential) (svc *eks.EKS, err error) {
-	svc = eks.New(session.New())
+func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
+	svc = eks.New(sesh)
 	return svc, err
 }
 
