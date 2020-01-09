@@ -2,8 +2,11 @@ package ekscluster
 
 import (
 	"context"
+	"log"
+	"time"
 
 	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
+	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
 	"github.com/aws/aws-sdk-go/aws"
 	eks "github.com/aws/aws-sdk-go/service/eks"
 	corev1 "k8s.io/api/core/v1"
@@ -19,7 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_ekscluster")
+var logger = logf.Log.WithName("controller_ekscluster")
 
 // Add creates a new EKSCluster Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -71,7 +74,7 @@ type ReconcileEKSCluster struct {
 }
 
 func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger := logger.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling EKSCluster")
 
 	// Fetch the EKSCluster instance
@@ -107,8 +110,22 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 
 	svc, err := GetEKSService(sesh)
 
-	// Construct cluster request
-	clusterInput := &eks.CreateClusterInput{
+	reqLogger.Info("Checking cluster existence")
+	exists, err := EKSClusterExists(svc, cluster.Spec.Name)
+
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if exists {
+		reqLogger.Info("Cluster exists:" + cluster.Spec.Name)
+		return reconcile.Result{}, nil
+	}
+
+	reqLogger.Info("Creating cluster:" + cluster.Spec.Name)
+
+	// Cluster doesnt exist, create it
+	_, err = CreateEKSCluster(svc, &eks.CreateClusterInput{
 		Name:    aws.String(cluster.Spec.Name),
 		RoleArn: aws.String(cluster.Spec.RoleArn),
 		Version: aws.String(cluster.Spec.Version),
@@ -116,9 +133,48 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 			SecurityGroupIds: aws.StringSlice(cluster.Spec.SecurityGroupIds),
 			SubnetIds:        aws.StringSlice(cluster.Spec.SubnetIds),
 		},
+	})
+
+	if err != nil {
+		return reconcile.Result{}, err
 	}
 
-	_, err := CreateCluster(svc, clusterInput)
+	// Set status to pending
+	cluster.Status.Status = core.PendingStatus
 
+	if err := r.client.Status().Update(ctx, cluster); err != nil {
+		logger.Error(err, "failed to update the resource status")
+		return reconcile.Result{}, err
+	}
+
+	// Wait for it to become ACTIVE
+	for {
+		log.Println("Checking the status of cluster:", cluster.Spec.Name)
+
+		status, err := GetEKSClusterStatus(svc, &eks.DescribeClusterInput{
+			Name: aws.String(cluster.Spec.Name),
+		})
+
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		if status == "ACTIVE" {
+			log.Println("Cluster active:", cluster.Spec.Name)
+			// Set status to success
+			cluster.Status.Status = core.SuccessStatus
+
+			if err := r.client.Status().Update(ctx, cluster); err != nil {
+				logger.Error(err, "failed to update the resource status")
+				return reconcile.Result{}, err
+			}
+			break
+		}
+		if status == "ERROR" {
+			log.Println("Cluster has ERROR status:", cluster.Spec.Name)
+			break
+		}
+		time.Sleep(5000 * time.Millisecond)
+	}
 	return reconcile.Result{}, nil
 }

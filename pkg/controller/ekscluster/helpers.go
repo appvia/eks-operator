@@ -33,7 +33,7 @@ func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
 }
 
 // Create an EKS cluster
-func CreateCluster(svc *eks.EKS, input *eks.CreateClusterInput) (output *eks.CreateClusterOutput, err error) {
+func CreateEKSCluster(svc *eks.EKS, input *eks.CreateClusterInput) (output *eks.CreateClusterOutput, err error) {
 	output, err = svc.CreateCluster(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
@@ -65,8 +65,40 @@ func CreateCluster(svc *eks.EKS, input *eks.CreateClusterInput) (output *eks.Cre
 	return
 }
 
+// Describe a cluster
+func DescribeEKSCluster(svc *eks.EKS, input *eks.DescribeClusterInput) (output *eks.DescribeClusterOutput, err error) {
+	output, err = svc.DescribeCluster(input)
+	return output, err
+}
+
+// Describe a cluster
+func GetEKSClusterStatus(svc *eks.EKS, input *eks.DescribeClusterInput) (status string, err error) {
+	cluster, err := svc.DescribeCluster(input)
+	return *cluster.Cluster.Status, err
+}
+
+//	Lists all EKS clusters
+func ListEKSClusters(svc *eks.EKS, input *eks.ListClustersInput) (output *eks.ListClustersOutput, err error) {
+	output, err = svc.ListClusters(input)
+	return output, err
+}
+
+// Check that a cluster exists
+func EKSClusterExists(svc *eks.EKS, clusterName string) (exists bool, err error) {
+	clusterList, err := svc.ListClusters(&eks.ListClustersInput{})
+	if err != nil {
+		return false, err
+	}
+	for _, i := range clusterList.Clusters {
+		if clusterName == *i {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // Delete an EKS cluster
-func DeleteCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.DeleteClusterOutput, err error) {
+func DeleteEKSCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.DeleteClusterOutput, err error) {
 	output, err = svc.DeleteCluster(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
