@@ -6,6 +6,7 @@ import (
 
 	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
 	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
+	"github.com/aws/aws-sdk-go/aws"
 	eks "github.com/aws/aws-sdk-go/service/eks"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
