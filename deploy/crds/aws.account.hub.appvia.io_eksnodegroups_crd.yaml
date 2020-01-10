@@ -41,18 +41,20 @@ spec:
               type: boolean
             instancetypes:
               type: array
-                items: string
+              items: 
+                type: string
             nodegroupname:
                 items: string
             releaseversion:
                 items: string
             subnets:
               type: array
-                items: string
+              items: 
+                type: string
             securitygroupids:
               description: A list of security group IDs
               type: array
-              items:
+              items: 
                 type: string
             subnets:
               description: The subnets to use for the Auto Scaling group that is created for your node group
