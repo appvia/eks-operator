@@ -98,6 +98,7 @@ spec:
             - subnets
             - noderole
             - region
+            - use
         status:
           description: EKSNodeGroupStatus defines the observed state of EKSNodeGroup
           type: object

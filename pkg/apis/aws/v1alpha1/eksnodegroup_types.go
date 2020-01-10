@@ -26,6 +26,11 @@ type EKSNodeGroupSpec struct {
 	Subnets string `json:"subnets"`
 	Tags    string `json:"tags,omitempty"`
 	Version string `json:"version,omitempty"`
+	Region  string `json:"region"`
+	// Use is a reference to an AWSCredentials object to use for authentication
+	// +kubebuilder:validation:Required
+	// +k8s:openapi-gen=false
+	Use core.Ownership `json:"use"`
 }
 
 // EKSNodeGroupStatus defines the observed state of EKSNodeGroup
