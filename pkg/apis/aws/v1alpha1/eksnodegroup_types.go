@@ -23,10 +23,10 @@ type EKSNodeGroupSpec struct {
 	RemoteAccess   string `json:"remoteaccess,omitempty"`
 	ScalingConfig  string `json:"scalingconfig,omitempty"`
 	// +kubebuilder:validation:Required
-	Subnets string `json:"subnets"`
-	Tags    string `json:"tags,omitempty"`
-	Version string `json:"version,omitempty"`
-	Region  string `json:"region"`
+	Subnets []string `json:"subnets"`
+	Tags    string   `json:"tags,omitempty"`
+	Version string   `json:"version,omitempty"`
+	Region  string   `json:"region"`
 	// Use is a reference to an AWSCredentials object to use for authentication
 	// +kubebuilder:validation:Required
 	// +k8s:openapi-gen=false

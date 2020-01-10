@@ -76,6 +76,6 @@ func DescribeEKSNodeGroup(svc *eks.EKS, input *eks.DescribeNodegroupInput) (outp
 
 // Get the status of an existing node group
 func GetEKSNodeGroupStatus(svc *eks.EKS, input *eks.DescribeNodegroupInput) (status string, err error) {
-	nodegroup, err := svc.DescribeNodeGroup(input)
+	nodegroup, err := svc.DescribeNodegroup(input)
 	return *nodegroup.Nodegroup.Status, err
 }

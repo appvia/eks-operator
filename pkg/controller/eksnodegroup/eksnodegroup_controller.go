@@ -101,11 +101,11 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 	svc, err := GetEKSService(sesh)
 
 	existingNodeGroup, err := DescribeEKSNodeGroup(svc, &eks.DescribeNodegroupInput{
-		ClusterName:   nodegroup.Spec.ClusterName,
-		NodegroupName: nodegroup.Spec.NodegroupName,
+		ClusterName:   aws.String(nodegroup.Spec.ClusterName),
+		NodegroupName: aws.String(nodegroup.Spec.NodegroupName),
 	})
 
-	if existingNodeGroup.Nodegroup {
+	if existingNodeGroup.Nodegroup != nil {
 		reqLogger.Info("Nodegroup exists")
 		return reconcile.Result{}, nil
 	}
@@ -119,11 +119,11 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	// Creat node group
-	output, err := CreateEKSNodeGroup(svc, &eks.CreateNodegroupInput{
-		ClusterName:   nodegroup.Spec.ClusterName,
-		NodeRole:      nodegroup.Spec.NodeRole,
-		NodegroupName: nodegroup.Spec.NodegroupName,
-		Subnets:       nodegroup.Spec.Subnets,
+	_, err = CreateEKSNodeGroup(svc, &eks.CreateNodegroupInput{
+		ClusterName:   aws.String(nodegroup.Spec.ClusterName),
+		NodeRole:      aws.String(nodegroup.Spec.NodeRole),
+		NodegroupName: aws.String(nodegroup.Spec.NodegroupName),
+		Subnets:       aws.StringSlice(nodegroup.Spec.Subnets),
 	})
 
 	if err != nil {
