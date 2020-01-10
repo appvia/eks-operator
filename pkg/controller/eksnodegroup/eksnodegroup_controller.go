@@ -2,8 +2,10 @@ package eksnodegroup
 
 import (
 	"context"
+	"time"
 
 	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
+	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
 	eks "github.com/aws/aws-sdk-go/service/eks"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,7 +20,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("controller_eksnodegroup")
+var logger = logf.Log.WithName("controller_eksnodegroup")
 
 // Add creates a new EKSNodeGroup Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -72,7 +74,7 @@ type ReconcileEKSNodeGroup struct {
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.Result, error) {
-	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger := logger.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling EKSNodeGroup")
 
 	// Fetch the EKSNodeGroup instance
@@ -108,6 +110,25 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 
 	svc, err := GetEKSService(sesh)
 
+	existingNodeGroup, err := DescribeEKSNodeGroup(svc, &eks.DescribeNodegroupInput{
+		ClusterName:   nodegroup.Spec.ClusterName,
+		NodegroupName: nodegroup.Spec.NodegroupName,
+	})
+
+	if existingNodeGroup.Nodegroup {
+		reqLogger.Info("Nodegroup exists")
+		return reconcile.Result{}, nil
+	}
+
+	// Set status to pending
+	nodegroup.Status.Status = core.PendingStatus
+
+	if err := r.client.Status().Update(ctx, nodegroup); err != nil {
+		logger.Error(err, "failed to update the resource status")
+		return reconcile.Result{}, err
+	}
+
+	// Creat node group
 	output, err := CreateEKSNodeGroup(svc, &eks.CreateNodegroupInput{
 		ClusterName:   nodegroup.Spec.ClusterName,
 		NodeRole:      nodegroup.Spec.NodeRole,
@@ -117,6 +138,37 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+
+	// Wait for node group to become ACTIVE
+	for {
+		reqLogger.Info("Checking the status of the node group:" + nodegroup.Spec.NodegroupName)
+
+		nodestatus, err := GetEKSNodeGroupStatus(svc, &eks.DescribeNodegroupInput{
+			ClusterName:   aws.String(nodegroup.Spec.ClusterName),
+			NodegroupName: aws.String(nodegroup.Spec.NodegroupName),
+		})
+
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+
+		if nodestatus == "ACTIVE" {
+			reqLogger.Info("Nodegroup active:" + nodegroup.Spec.NodegroupName)
+			// Set status to success
+			nodegroup.Status.Status = core.SuccessStatus
+
+			if err := r.client.Status().Update(ctx, nodegroup); err != nil {
+				logger.Error(err, "failed to update the resource status")
+				return reconcile.Result{}, err
+			}
+			break
+		}
+		if nodestatus == "ERROR" {
+			reqLogger.Info("Node group has ERROR status:" + nodegroup.Spec.NodegroupName)
+			break
+		}
+		time.Sleep(5000 * time.Millisecond)
 	}
 
 	return reconcile.Result{}, nil

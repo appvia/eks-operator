@@ -32,7 +32,7 @@ func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
 	return svc, err
 }
 
-// Create an EKS cluster
+// Create an EKS node group
 func CreateEKSNodeGroup(svc *eks.EKS, input *eks.CreateNodegroupInput) (output *eks.CreateNodegroupOutput, err error) {
 	output, err = svc.CreateNodegroup(input)
 	if err != nil {
@@ -63,4 +63,19 @@ func CreateEKSNodeGroup(svc *eks.EKS, input *eks.CreateNodegroupInput) (output *
 		return
 	}
 	return
+}
+
+// Describe an existing node group
+func DescribeEKSNodeGroup(svc *eks.EKS, input *eks.DescribeNodegroupInput) (output *eks.DescribeNodegroupOutput, err error) {
+	output, err = svc.DescribeNodegroup(input)
+	if err != nil {
+		return output, err
+	}
+	return
+}
+
+// Get the status of an existing node group
+func GetEKSNodeGroupStatus(svc *eks.EKS, input *eks.DescribeNodegroupInput) (status string, err error) {
+	nodegroup, err := svc.DescribeNodeGroup(input)
+	return *nodegroup.Nodegroup.Status, err
 }
