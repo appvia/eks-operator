@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/appvia/hub-apis v0.0.2
-	github.com/aws/aws-sdk-go v1.16.26
+	github.com/aws/aws-sdk-go v1.27.4
 	github.com/go-openapi/spec v0.19.3
 	github.com/operator-framework/operator-sdk v0.12.0
 	github.com/spf13/pflag v1.0.3
