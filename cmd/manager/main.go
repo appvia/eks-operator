@@ -36,6 +36,8 @@ var (
 	metricsHost               = "0.0.0.0"
 	metricsPort         int32 = 8383
 	operatorMetricsPort int32 = 8686
+	publishClasses            = true
+	publishCRDs               = true
 )
 var log = logf.Log.WithName("cmd")
 
@@ -54,6 +56,10 @@ func main() {
 	// Add flags registered by imported packages (e.g. glog and
 	// controller-runtime)
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+
+	// Options for publishing items
+	pflag.BoolVar(&publishClasses, "publish-classes", true, "indicates the operator should publish it's classes and plans")
+	pflag.BoolVar(&publishCRDs, "publish-crds", true, "indicates the operator should register crds")
 
 	pflag.Parse()
 
@@ -79,6 +85,12 @@ func main() {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	// @step: create a client and register the classes
+	if err := publishOperator(cfg); err != nil {
+		log.Error(err, "failed to register the classes")
 		os.Exit(1)
 	}
 
