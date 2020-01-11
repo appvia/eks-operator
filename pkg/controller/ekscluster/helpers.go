@@ -71,6 +71,28 @@ func DescribeEKSCluster(svc *eks.EKS, input *eks.DescribeClusterInput) (output *
 	return output, err
 }
 
+// Check if a cluster exists
+func CheckEKSClusterExists(svc *eks.EKS, input *eks.DescribeClusterInput) (exists bool, err error) {
+	_, err = svc.DescribeCluster(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case eks.ErrCodeResourceNotFoundException:
+				return false, nil
+			default:
+				fmt.Println(aerr.Error())
+				return false, err
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+			return false, err
+		}
+	}
+	return true, nil
+}
+
 // Describe a cluster
 func GetEKSClusterStatus(svc *eks.EKS, input *eks.DescribeClusterInput) (status string, err error) {
 	cluster, err := svc.DescribeCluster(input)

@@ -16,7 +16,7 @@ type EKSNodeGroupSpec struct {
 	ForceUpdateEnabled string `json:"forceupdateenabled,omitempty"`
 	InstanceTypes      string `json:"instancetypes,omitempty"`
 	Labels             string `json:"labels,omitempty"`
-	NodegroupName      string `json:"nodegroupname,omitempty"`
+	NodegroupName      string `json:"nodegroupname"`
 	// +kubebuilder:validation:Required
 	NodeRole       string `json:"noderole"`
 	ReleaseVersion string `json:"releaseversion,omitempty"`

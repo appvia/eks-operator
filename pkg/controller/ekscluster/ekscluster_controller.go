@@ -100,14 +100,17 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 	svc, err := GetEKSService(sesh)
 
 	reqLogger.Info("Checking cluster existence")
-	exists, err := EKSClusterExists(svc, cluster.Spec.Name)
+
+	clusterExists, err := CheckEKSClusterExists(svc, &eks.DescribeClusterInput{
+		Name: aws.String(cluster.Spec.Name),
+	})
 
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if exists {
-		reqLogger.Info("Cluster exists:" + cluster.Spec.Name)
+	if clusterExists {
+		reqLogger.Info("Cluster exists: " + cluster.Spec.Name)
 		return reconcile.Result{}, nil
 	}
 

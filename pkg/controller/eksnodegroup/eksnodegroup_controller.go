@@ -100,12 +100,16 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 
 	svc, err := GetEKSService(sesh)
 
-	existingNodeGroup, err := DescribeEKSNodeGroup(svc, &eks.DescribeNodegroupInput{
+	nodeGroupExists, err := CheckEKSNodeGroupExists(svc, &eks.DescribeNodegroupInput{
 		ClusterName:   aws.String(nodegroup.Spec.ClusterName),
 		NodegroupName: aws.String(nodegroup.Spec.NodegroupName),
 	})
 
-	if existingNodeGroup.Nodegroup != nil {
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if nodeGroupExists {
 		reqLogger.Info("Nodegroup exists")
 		return reconcile.Result{}, nil
 	}
@@ -118,7 +122,8 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 		return reconcile.Result{}, err
 	}
 
-	// Creat node group
+	// Create node group
+	reqLogger.Info("Creating nodegroup")
 	_, err = CreateEKSNodeGroup(svc, &eks.CreateNodegroupInput{
 		ClusterName:   aws.String(nodegroup.Spec.ClusterName),
 		NodeRole:      aws.String(nodegroup.Spec.NodeRole),
@@ -127,12 +132,13 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 	})
 
 	if err != nil {
+		logger.Error(err, "create nodegroup error")
 		return reconcile.Result{}, err
 	}
 
 	// Wait for node group to become ACTIVE
 	for {
-		reqLogger.Info("Checking the status of the node group:" + nodegroup.Spec.NodegroupName)
+		reqLogger.Info("Checking the status of the node group: " + nodegroup.Spec.NodegroupName)
 
 		nodestatus, err := GetEKSNodeGroupStatus(svc, &eks.DescribeNodegroupInput{
 			ClusterName:   aws.String(nodegroup.Spec.ClusterName),

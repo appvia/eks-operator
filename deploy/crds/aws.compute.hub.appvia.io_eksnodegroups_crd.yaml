@@ -94,6 +94,7 @@ spec:
                 - version
               type: object
           required:
+            - nodegroupname
             - clustername
             - subnets
             - noderole

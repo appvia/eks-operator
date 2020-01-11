@@ -69,9 +69,43 @@ func CreateEKSNodeGroup(svc *eks.EKS, input *eks.CreateNodegroupInput) (output *
 func DescribeEKSNodeGroup(svc *eks.EKS, input *eks.DescribeNodegroupInput) (output *eks.DescribeNodegroupOutput, err error) {
 	output, err = svc.DescribeNodegroup(input)
 	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case eks.ErrCodeResourceNotFoundException:
+				fmt.Println(eks.ErrCodeResourceNotFoundException, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
 		return output, err
 	}
 	return
+}
+
+// Check if a node group exists
+func CheckEKSNodeGroupExists(svc *eks.EKS, input *eks.DescribeNodegroupInput) (exists bool, err error) {
+	_, err = svc.DescribeNodegroup(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case eks.ErrCodeResourceNotFoundException:
+				return false, nil
+			default:
+				fmt.Println(aerr.Error())
+				return false, err
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+			return false, err
+		}
+	}
+	return true, nil
 }
 
 // Get the status of an existing node group
