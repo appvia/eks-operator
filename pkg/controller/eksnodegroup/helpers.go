@@ -1,4 +1,4 @@
-package ekscluster
+package eksnodegroup
 
 import (
 	"fmt"
@@ -32,9 +32,9 @@ func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
 	return svc, err
 }
 
-// Create an EKS cluster
-func CreateEKSCluster(svc *eks.EKS, input *eks.CreateClusterInput) (output *eks.CreateClusterOutput, err error) {
-	output, err = svc.CreateCluster(input)
+// Create an EKS node group
+func CreateEKSNodeGroup(svc *eks.EKS, input *eks.CreateNodegroupInput) (output *eks.CreateNodegroupOutput, err error) {
+	output, err = svc.CreateNodegroup(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -65,15 +65,30 @@ func CreateEKSCluster(svc *eks.EKS, input *eks.CreateClusterInput) (output *eks.
 	return
 }
 
-// Describe a cluster
-func DescribeEKSCluster(svc *eks.EKS, input *eks.DescribeClusterInput) (output *eks.DescribeClusterOutput, err error) {
-	output, err = svc.DescribeCluster(input)
-	return output, err
+// Describe an existing node group
+func DescribeEKSNodeGroup(svc *eks.EKS, input *eks.DescribeNodegroupInput) (output *eks.DescribeNodegroupOutput, err error) {
+	output, err = svc.DescribeNodegroup(input)
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case eks.ErrCodeResourceNotFoundException:
+				fmt.Println(eks.ErrCodeResourceNotFoundException, aerr.Error())
+			default:
+				fmt.Println(aerr.Error())
+			}
+		} else {
+			// Print the error, cast err to awserr.Error to get the Code and
+			// Message from an error.
+			fmt.Println(err.Error())
+		}
+		return output, err
+	}
+	return
 }
 
-// Check if a cluster exists
-func CheckEKSClusterExists(svc *eks.EKS, input *eks.DescribeClusterInput) (exists bool, err error) {
-	_, err = svc.DescribeCluster(input)
+// Check if a node group exists
+func CheckEKSNodeGroupExists(svc *eks.EKS, input *eks.DescribeNodegroupInput) (exists bool, err error) {
+	_, err = svc.DescribeNodegroup(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -93,57 +108,8 @@ func CheckEKSClusterExists(svc *eks.EKS, input *eks.DescribeClusterInput) (exist
 	return true, nil
 }
 
-// Describe a cluster
-func GetEKSClusterStatus(svc *eks.EKS, input *eks.DescribeClusterInput) (status string, err error) {
-	cluster, err := svc.DescribeCluster(input)
-	return *cluster.Cluster.Status, err
-}
-
-//	Lists all EKS clusters
-func ListEKSClusters(svc *eks.EKS, input *eks.ListClustersInput) (output *eks.ListClustersOutput, err error) {
-	output, err = svc.ListClusters(input)
-	return output, err
-}
-
-// Check that a cluster exists
-func EKSClusterExists(svc *eks.EKS, clusterName string) (exists bool, err error) {
-	clusterList, err := svc.ListClusters(&eks.ListClustersInput{})
-	if err != nil {
-		return false, err
-	}
-	for _, i := range clusterList.Clusters {
-		if clusterName == *i {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-// Delete an EKS cluster
-func DeleteEKSCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.DeleteClusterOutput, err error) {
-	output, err = svc.DeleteCluster(input)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case eks.ErrCodeResourceInUseException:
-				fmt.Println(eks.ErrCodeResourceInUseException, aerr.Error())
-			case eks.ErrCodeResourceNotFoundException:
-				fmt.Println(eks.ErrCodeResourceNotFoundException, aerr.Error())
-			case eks.ErrCodeClientException:
-				fmt.Println(eks.ErrCodeClientException, aerr.Error())
-			case eks.ErrCodeServerException:
-				fmt.Println(eks.ErrCodeServerException, aerr.Error())
-			case eks.ErrCodeServiceUnavailableException:
-				fmt.Println(eks.ErrCodeServiceUnavailableException, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
-		return
-	}
-	return
+// Get the status of an existing node group
+func GetEKSNodeGroupStatus(svc *eks.EKS, input *eks.DescribeNodegroupInput) (status string, err error) {
+	nodegroup, err := svc.DescribeNodegroup(input)
+	return *nodegroup.Nodegroup.Status, err
 }

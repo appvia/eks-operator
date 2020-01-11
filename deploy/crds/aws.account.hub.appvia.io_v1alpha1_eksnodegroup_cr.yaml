@@ -1,0 +1,7 @@
+apiVersion: aws.account.hub.appvia.io/v1alpha1
+kind: EKSNodeGroup
+metadata:
+  name: example-eksnodegroup
+spec:
+  # Add fields here
+  size: 3

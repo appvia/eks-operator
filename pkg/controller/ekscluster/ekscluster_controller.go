@@ -9,7 +9,6 @@ import (
 	core "github.com/appvia/hub-apis/pkg/apis/core/v1"
 	"github.com/aws/aws-sdk-go/aws"
 	eks "github.com/aws/aws-sdk-go/service/eks"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -45,16 +44,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// Watch for changes to primary resource EKSCluster
 	err = c.Watch(&source.Kind{Type: &awsv1alpha1.EKSCluster{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner EKSCluster
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &awsv1alpha1.EKSCluster{},
-	})
 	if err != nil {
 		return err
 	}
@@ -111,14 +100,17 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 	svc, err := GetEKSService(sesh)
 
 	reqLogger.Info("Checking cluster existence")
-	exists, err := EKSClusterExists(svc, cluster.Spec.Name)
+
+	clusterExists, err := CheckEKSClusterExists(svc, &eks.DescribeClusterInput{
+		Name: aws.String(cluster.Spec.Name),
+	})
 
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if exists {
-		reqLogger.Info("Cluster exists:" + cluster.Spec.Name)
+	if clusterExists {
+		reqLogger.Info("Cluster exists: " + cluster.Spec.Name)
 		return reconcile.Result{}, nil
 	}
 
