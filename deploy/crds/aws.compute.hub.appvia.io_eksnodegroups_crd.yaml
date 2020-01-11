@@ -37,8 +37,6 @@ spec:
               type: string
             disksize:
               type: string
-            forceupdateenabled:
-              type: boolean
             instancetypes:
               type: array
               items: 
@@ -68,6 +66,10 @@ spec:
               type: string
             version:
               type: string
+            tags:
+              type: object
+            labels:
+              type: object
             use:
               description: Use is a reference to an AWSCredentials object to use
               properties:

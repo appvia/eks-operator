@@ -12,21 +12,31 @@ type EKSNodeGroupSpec struct {
 	AmiType string `json:"amitype,omitempty"`
 	// +kubebuilder:validation:Required
 	ClusterName        string `json:"clustername"`
-	DiskSize           string `json:"disksize,omitempty"`
-	ForceUpdateEnabled string `json:"forceupdateenabled,omitempty"`
-	InstanceTypes      string `json:"instancetypes,omitempty"`
-	Labels             string `json:"labels,omitempty"`
+	DiskSize           int64 `json:"disksize,omitempty"`
+	InstanceTypes      []string `json:"instancetypes,omitempty"`
+	Labels             map[string]string `json:"labels,omitempty"`
 	NodegroupName      string `json:"nodegroupname"`
 	// +kubebuilder:validation:Required
 	NodeRole       string `json:"noderole"`
 	ReleaseVersion string `json:"releaseversion,omitempty"`
 	RemoteAccess   string `json:"remoteaccess,omitempty"`
-	ScalingConfig  string `json:"scalingconfig,omitempty"`
+	DesiredSize    int64    `json:"desiredsize,omitempty"`
+	MaxSize        int64    `json:"maxsize,omitempty"`
+	MinSize        int64    `json:"minsize,omitempty"`
 	// +kubebuilder:validation:Required
 	Subnets []string `json:"subnets"`
-	Tags    string   `json:"tags,omitempty"`
+	// The metadata to apply to the node group
+	Tags    map[string]string   `json:"tags,omitempty"`
+	// The Kubernetes version to use for your managed nodes
 	Version string   `json:"version,omitempty"`
+	// AWS region to launch node group within, must match the region of the cluster
 	Region  string   `json:"region"`
+	// The Amazon EC2 SSH key that provides access for SSH communication with 
+	// the worker nodes in the managed node group
+	// https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html
+	SourceSecurityGroups []string `json:"sourcesecuritygroups,omitempty"`
+	// The security groups that are allowed SSH access (port 22) to the worker nodes
+	Ec2SshKey	string `json:"ec2sshkey,omitempty"`
 	// Use is a reference to an AWSCredentials object to use for authentication
 	// +kubebuilder:validation:Required
 	// +k8s:openapi-gen=false
