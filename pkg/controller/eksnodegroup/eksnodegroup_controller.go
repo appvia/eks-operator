@@ -125,10 +125,25 @@ func (r *ReconcileEKSNodeGroup) Reconcile(request reconcile.Request) (reconcile.
 	// Create node group
 	reqLogger.Info("Creating nodegroup")
 	_, err = CreateEKSNodeGroup(svc, &eks.CreateNodegroupInput{
-		ClusterName:   aws.String(nodegroup.Spec.ClusterName),
-		NodeRole:      aws.String(nodegroup.Spec.NodeRole),
-		NodegroupName: aws.String(nodegroup.Spec.NodegroupName),
-		Subnets:       aws.StringSlice(nodegroup.Spec.Subnets),
+		AmiType:        aws.String(nodegroup.Spec.AmiType),
+		ClusterName:    aws.String(nodegroup.Spec.ClusterName),
+		NodeRole:       aws.String(nodegroup.Spec.NodeRole),
+		ReleaseVersion: aws.String(nodegroup.Spec.ReleaseVersion),
+		DiskSize:       aws.Int64(nodegroup.Spec.DiskSize),
+		InstanceTypes:  aws.StringSlice(nodegroup.Spec.InstanceTypes),
+		NodegroupName:  aws.String(nodegroup.Spec.NodegroupName),
+		Subnets:        aws.StringSlice(nodegroup.Spec.Subnets),
+		RemoteAccess: &eks.RemoteAccessConfig{
+			Ec2SshKey:            aws.String(nodegroup.Spec.Ec2SshKey),
+			SourceSecurityGroups: aws.StringSlice(nodegroup.Spec.SourceSecurityGroups),
+		},
+		ScalingConfig: &eks.NodegroupScalingConfig{
+			DesiredSize: aws.Int64(nodegroup.Spec.DesiredSize),
+			MaxSize:     aws.Int64(nodegroup.Spec.MaxSize),
+			MinSize:     aws.Int64(nodegroup.Spec.MinSize),
+		},
+		Tags:   aws.StringMap(nodegroup.Spec.Tags),
+		Labels: aws.StringMap(nodegroup.Spec.Labels),
 	})
 
 	if err != nil {
