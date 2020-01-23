@@ -3,6 +3,7 @@ module github.com/appvia/eks-operator
 go 1.13
 
 require (
+	github.com/appvia/aws-operator v0.0.0-20200122132022-b34aaa693280
 	github.com/appvia/hub-apis v0.0.2
 	github.com/aws/aws-sdk-go v1.27.4
 	github.com/go-openapi/spec v0.19.3

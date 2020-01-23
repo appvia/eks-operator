@@ -8,7 +8,7 @@ spec:
     kind: EKSBearerToken
     listKind: EKSBearerTokenList
     plural: eksbearertokens
-    singular: awscredential
+    singular: eksbearertoken
   scope: Namespaced
   subresources:
     status: {}
@@ -30,21 +30,14 @@ spec:
           type: object
         spec:
           description: EKSBearerTokenSpec defines the desired state of EKSBearerToken
-          type: object
-        status:
-          description: EKSBearerTokenStatus defines the observed state of EKSBearerToken
-          type: object
-        spec:
-          description: EKSBearerTokensSpec defines the desired state of EKSBearerTokens
           properties:
             token:
-              description: Bearer token for accessing the cluster
               type: string
           required:
           - token
           type: object
         status:
-          description: EKSBearerTokensStatus defines the observed state of EKSBearerTokens
+          description: EKSBearerTokenStatus defines the observed state of EKSBearerToken
           properties:
             status:
               description: Status provides a overall status

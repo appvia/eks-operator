@@ -2,13 +2,12 @@ package ekscluster
 
 import (
 	"fmt"
-	"unicode/utf8"
-	"regexp"
+	"time"
 
-	strings "strings"
 	b64 "encoding/base64"
-	url "net/url"
 	http "net/http"
+	url "net/url"
+	strings "strings"
 
 	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
 
@@ -16,10 +15,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/aws/signer/v4"
 
-	sts "github.com/aws/aws-sdk-go/service/sts"
+	v4 "github.com/aws/aws-sdk-go/aws/signer/v4"
 	eks "github.com/aws/aws-sdk-go/service/eks"
+	sts "github.com/aws/aws-sdk-go/service/sts"
 )
 
 // VerifyCredentials is responsible for verifying AWS creds
@@ -43,7 +42,7 @@ func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
 }
 
 func GetSTSService(sesh *session.Session) (svc *sts.STS, err error) {
-	svc := sts.New(sesh)
+	svc = sts.New(sesh)
 	return svc, err
 }
 
@@ -163,8 +162,8 @@ func DeleteEKSCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.
 	return
 }
 
-func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string, expiration int64) (bearer string, error err) {
-	signer = Signer{
+func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string) (bearer string, err error) {
+	signer := v4.Signer{
 		Credentials: credentials.NewStaticCredentials(cred.Spec.AccessKeyId, cred.Spec.SecretAccessKey, ""),
 	}
 
@@ -174,19 +173,25 @@ func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string, e
 		return
 	}
 
-	header = map[string][]string{
+	header := map[string][]string{
 		"x-k8s-aws-id": {clusterId},
 	}
 
-	request = http.Request{
+	request := &http.Request{
 		Method: "GET",
-		URL: destUrl,
-		Body: nil,
+		URL:    destUrl,
+		Body:   nil,
 		Header: header,
 	}
 
+	expiration, err := time.ParseDuration("60s")
+
+	if err != nil {
+		return
+	}
+
 	// Presign the http request
-	signedUrl, err := signer.Presign(request, nil, "sts", region, time.Duration(expiration*time.Second), time.Now())
+	signedUrl, err := signer.Presign(request, nil, "sts", region, expiration, time.Now())
 
 	// Base64 encode it
 	encodedUrl := b64.StdEncoding.EncodeToString([]byte(signedUrl))

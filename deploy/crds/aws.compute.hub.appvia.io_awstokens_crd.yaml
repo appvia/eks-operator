@@ -31,6 +31,14 @@ spec:
         spec:
           description: AWSTokenSpec defines the desired state of AWSToken
           properties:
+            accountId:
+              description: Account is the AWS account these credentials reside within
+              maxLength: 12
+              minLength: 12
+              type: string
+            expiration:
+              description: Expiration is the expiry date time of this token
+              type: string
             id:
               description: AWS Access Key ID
               type: string
@@ -40,20 +48,25 @@ spec:
             token:
               description: AWS Session Token
               type: string
-            expiration:
-              description: Expiration date time
-              type: string
-            accountId:
-              description: AWS Account ID
-              type: string
           required:
+          - accountId
+          - expiration
           - id
           - secret
           - token
-          - expiration
-          - accountId
+          type: object
         status:
           description: AWSTokenStatus defines the observed state of AWSToken
+          properties:
+            status:
+              description: Status provides a overall status
+              type: string
+            verified:
+              description: Verified checks that the credentials are ok and valid
+              type: boolean
+          required:
+          - status
+          - verified
           type: object
       type: object
   version: v1alpha1

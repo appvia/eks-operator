@@ -33,6 +33,8 @@ github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdko
 github.com/Rican7/retry v0.1.0/go.mod h1:FgOROf8P5bebcC1DS0PdOQiqGUridaZvikzUmkFW6gg=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
+github.com/appvia/aws-operator v0.0.0-20200122132022-b34aaa693280 h1:I3l56gOdjGG0wNO6YJts3T7tZ6QfcHp+4wY/PTS+esc=
+github.com/appvia/aws-operator v0.0.0-20200122132022-b34aaa693280/go.mod h1:syg20yWE6hBiiuv6PIKi/TALU60py3nFe0/qSSirmBo=
 github.com/appvia/hub-apis v0.0.2 h1:50HmzZlhMoj8hcgGAyqUvafrYw/ezJqVu5pOaMpYw10=
 github.com/appvia/hub-apis v0.0.2/go.mod h1:MVvrfPNpqBzTPO6pFytWcR8J/b5D3/YsjjFnMLhM/yE=
 github.com/armon/circbuf v0.0.0-20150827004946-bbbad097214e/go.mod h1:3U/XgcO3hCbHZ8TKRvWD2dDTCfh9M9ya+I9JpbB7O8o=

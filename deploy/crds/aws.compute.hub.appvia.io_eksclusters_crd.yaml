@@ -32,25 +32,29 @@ spec:
           description: EKSClusterSpec defines the desired state of EKSCluster
           properties:
             name:
-              type: string
-            securitygroupids:
-              description: A list of security group IDs
-              type: array
-              items:
-                type: string
-            subnetids:
-              description: A list of subnet IDs
-              type: array
-              items:
-                type: string
-            rolearn:
+              description: Name the name of the EKS cluster
+              minLength: 3
               type: string
             region:
+              description: SubnetIds is a list of subnet IDs
               type: string
-            version:
+            rolearn:
+              description: RoleArn is the role arn which provides permissions to EKS
+              minLength: 10
               type: string
+            securitygroupids:
+              description: SecurityGroupIds is a list of security group IDs
+              items:
+                type: string
+              type: array
+            subnetids:
+              description: AWS region to launch this cluster within
+              items:
+                type: string
+              type: array
             use:
-              description: Use is a reference to an AWSCredentials object to use
+              description: Use is a reference to an AWSCredentials object to use for
+                authentication
               properties:
                 group:
                   description: Group is the api group
@@ -68,19 +72,31 @@ spec:
                   description: Version is the group version
                   type: string
               required:
-                - group
-                - kind
-                - name
-                - namespace
-                - version
+              - group
+              - kind
+              - name
+              - namespace
+              - version
               type: object
+            version:
+              description: Version is the Kubernetes version to use
+              minLength: 3
+              type: string
           required:
-            - name
-            - subnetids
-            - rolearn
-            - region
+          - name
+          - region
+          - rolearn
+          - subnetids
+          - use
+          type: object
         status:
           description: EKSClusterStatus defines the observed state of EKSCluster
+          properties:
+            status:
+              description: Status provides a overall status
+              type: string
+          required:
+          - status
           type: object
       type: object
   version: v1alpha1

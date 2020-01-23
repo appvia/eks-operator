@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	awsv1alpha1 "github.com/appvia/aws-operator/pkg/apis/aws/v1alpha1"
-	"github.com/appvia/aws-operator/pkg/apis/schema"
+	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
 
 	configv1 "github.com/appvia/hub-apis/pkg/apis/config/v1"
 	"github.com/appvia/hub-apis/pkg/publish"

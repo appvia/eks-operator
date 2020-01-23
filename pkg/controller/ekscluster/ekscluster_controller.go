@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	eks "github.com/aws/aws-sdk-go/service/eks"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -163,7 +164,7 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 
 			log.Println("Generating bearer token for cluster:", cluster.Spec.Name)
 
-			bearerToken, err := GetBearerToken(credentials, cluster.Spec.Name, cluster.Spec.Region, int64(60))
+			bearerToken, err := GetBearerToken(credentials, cluster.Spec.Name, cluster.Spec.Region)
 
 			// Create the bearer token as a CR
 			reqLogger.Info("Creating the EKSBearerToken CR:" + cluster.Spec.Name + "-token in namespace: " + request.Namespace)
@@ -174,20 +175,20 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 					Namespace: request.Namespace,
 				},
 				Spec: awsv1alpha1.EKSBearerTokenSpec{
-					Token:	bearerToken,
+					Token: bearerToken,
 				},
 				Status: awsv1alpha1.EKSBearerTokenStatus{
 					Status: "Success",
 				},
 			}
 
-			err = r.client.Create(ctx, serviceAccountCredential)
+			err = r.client.Create(ctx, bearer)
 
 			if err != nil {
 				return reconcile.Result{}, err
 			}
 
-			reconcile.Result{}, nil
+			return reconcile.Result{}, nil
 		}
 		if status == "ERROR" {
 			log.Println("Cluster has ERROR status:", cluster.Spec.Name)
