@@ -162,12 +162,12 @@ func DeleteEKSCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.
 	return
 }
 
-func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string) (bearer string, err error) {
+func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId string) (bearer string, err error) {
 	signer := v4.Signer{
 		Credentials: credentials.NewStaticCredentials(cred.Spec.AccessKeyId, cred.Spec.SecretAccessKey, ""),
 	}
 
-	destUrl, err := url.Parse("https://sts." + region + ".amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15")
+	destURL, err := url.Parse("https://sts.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15")
 
 	if err != nil {
 		return
@@ -179,7 +179,7 @@ func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string) (
 
 	request := &http.Request{
 		Method: "GET",
-		URL:    destUrl,
+		URL:    destURL,
 		Body:   nil,
 		Header: header,
 	}
@@ -191,7 +191,7 @@ func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string) (
 	}
 
 	// Presign the http request
-	signedUrl, err := signer.Presign(request, nil, "sts", region, expiration, time.Now())
+	signedUrl, err := signer.Presign(request, nil, "sts", "us-east-1", expiration, time.Now())
 
 	// Base64 encode it
 	encodedUrl := b64.StdEncoding.EncodeToString([]byte(signedUrl))

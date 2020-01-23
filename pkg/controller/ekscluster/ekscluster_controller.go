@@ -164,7 +164,7 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 
 			log.Println("Generating bearer token for cluster:", cluster.Spec.Name)
 
-			bearerToken, err := GetBearerToken(credentials, cluster.Spec.Name, cluster.Spec.Region)
+			bearerToken, err := GetBearerToken(credentials, cluster.Spec.Name)
 
 			// Create the bearer token as a CR
 			reqLogger.Info("Creating the EKSBearerToken CR:" + cluster.Spec.Name + "-token in namespace: " + request.Namespace)
