@@ -42,7 +42,7 @@ func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
 	return svc, err
 }
 
-func GetSTSService(sesh *session.Session) (svc *eks.EKS, err error) {
+func GetSTSService(sesh *session.Session) (svc *sts.STS, err error) {
 	svc := sts.New(sesh)
 	return svc, err
 }
