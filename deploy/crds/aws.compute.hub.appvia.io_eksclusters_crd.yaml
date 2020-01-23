@@ -36,12 +36,12 @@ spec:
             securitygroupids:
               description: A list of security group IDs
               type: array
-              items: 
+              items:
                 type: string
             subnetids:
               description: A list of subnet IDs
               type: array
-              items: 
+              items:
                 type: string
             rolearn:
               type: string

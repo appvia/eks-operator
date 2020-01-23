@@ -1,0 +1,60 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: eksbearertokens.aws.compute.hub.appvia.io
+spec:
+  group: aws.compute.hub.appvia.io
+  names:
+    kind: EKSBearerToken
+    listKind: EKSBearerTokenList
+    plural: eksbearertokens
+    singular: awscredential
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: EKSBearerToken is the Schema for the eksbearertokens API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: EKSBearerTokenSpec defines the desired state of EKSBearerToken
+          type: object
+        status:
+          description: EKSBearerTokenStatus defines the observed state of EKSBearerToken
+          type: object
+        spec:
+          description: EKSBearerTokensSpec defines the desired state of EKSBearerTokens
+          properties:
+            token:
+              description: Bearer token for accessing the cluster
+              type: string
+          required:
+          - token
+          type: object
+        status:
+          description: EKSBearerTokensStatus defines the observed state of EKSBearerTokens
+          properties:
+            status:
+              description: Status provides a overall status
+              type: string
+          required:
+          - status
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true

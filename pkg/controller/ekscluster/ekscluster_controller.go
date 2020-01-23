@@ -160,7 +160,38 @@ func (r *ReconcileEKSCluster) Reconcile(request reconcile.Request) (reconcile.Re
 				logger.Error(err, "failed to update the resource status")
 				return reconcile.Result{}, err
 			}
-			break
+
+			log.Println("Generating bearer token for cluster:", cluster.Spec.Name)
+
+			bearerToken, err := GetBearerToken(credentials, cluster.Spec.Name, cluster.Spec.Region, int64(60))
+
+			bearer := &awsv1alpha1.EKSBearerToken{
+				Token: bearerToken,
+			}
+
+			// Create the bearer token as a CR
+			reqLogger.Info("Creating the EKSBearerToken CR:" + cluster.Spec.Name + "-token in namespace: " + request.Namespace)
+
+			bearer := &awsv1alpha1.EKSBearerToken{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      cluster.Spec.Name + "-token",
+					Namespace: request.Namespace,
+				},
+				Spec: awsv1alpha1.EKSBearerTokenSpec{
+					Token:	bearerToken,
+				},
+				Status: awsv1alpha1.EKSBearerTokenStatus{
+					Status: "Success",
+				},
+			}
+
+			err = r.client.Create(ctx, serviceAccountCredential)
+
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+
+			reconcile.Result{}, nil
 		}
 		if status == "ERROR" {
 			log.Println("Cluster has ERROR status:", cluster.Spec.Name)

@@ -2,6 +2,13 @@ package ekscluster
 
 import (
 	"fmt"
+	"unicode/utf8"
+	"regexp"
+
+	strings "strings"
+	b64 "encoding/base64"
+	url "net/url"
+	http "net/http"
 
 	awsv1alpha1 "github.com/appvia/eks-operator/pkg/apis/aws/v1alpha1"
 
@@ -9,6 +16,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/aws/signer/v4"
+
+	sts "github.com/aws/aws-sdk-go/service/sts"
 	eks "github.com/aws/aws-sdk-go/service/eks"
 )
 
@@ -29,6 +39,11 @@ func GetAWSSession(cred *awsv1alpha1.AWSCredential, region string) (*session.Ses
 // Get an EKS service
 func GetEKSService(sesh *session.Session) (svc *eks.EKS, err error) {
 	svc = eks.New(sesh)
+	return svc, err
+}
+
+func GetSTSService(sesh *session.Session) (svc *eks.EKS, err error) {
+	svc := sts.New(sesh)
 	return svc, err
 }
 
@@ -146,4 +161,40 @@ func DeleteEKSCluster(svc *eks.EKS, input *eks.DeleteClusterInput) (output *eks.
 		return
 	}
 	return
+}
+
+func GetBearerToken(cred *awsv1alpha1.AWSCredential, clusterId, region string, expiration int64) (bearer string, error err) {
+	signer = Signer{
+		Credentials: credentials.NewStaticCredentials(cred.Spec.AccessKeyId, cred.Spec.SecretAccessKey, ""),
+	}
+
+	destUrl, err := url.Parse("https://sts." + region + ".amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15")
+
+	if err != nil {
+		return
+	}
+
+	header = map[string][]string{
+		"x-k8s-aws-id": {clusterId},
+	}
+
+	request = http.Request{
+		Method: "GET",
+		URL: destUrl,
+		Body: nil,
+		Header: header,
+	}
+
+	// Presign the http request
+	signedUrl, err := signer.Presign(request, nil, "sts", region, time.Duration(expiration*time.Second), time.Now())
+
+	// Base64 encode it
+	encodedUrl := b64.StdEncoding.EncodeToString([]byte(signedUrl))
+
+	// Remove padding
+	bearerKey := strings.ReplaceAll(encodedUrl, "=", "")
+
+	bearer = "k8s-aws-v1." + bearerKey
+
+	return bearer, err
 }
